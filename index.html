@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a1a2e">
+  <title>Ramadan 2026 - Prayer Times</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f0f1a;
+      --bg-secondary: #1a1a2e;
+      --bg-card: #16213e;
+      --bg-card-hover: #1a2744;
+      --accent: #e2b04a;
+      --accent-soft: rgba(226, 176, 74, 0.15);
+      --accent-glow: rgba(226, 176, 74, 0.3);
+      --text-primary: #f0e6d3;
+      --text-secondary: #a89b8c;
+      --text-muted: #6b6377;
+      --border: rgba(226, 176, 74, 0.1);
+      --highlight-bg: rgba(226, 176, 74, 0.08);
+      --today-bg: linear-gradient(135deg, rgba(226, 176, 74, 0.18), rgba(226, 176, 74, 0.06));
+      --today-border: rgba(226, 176, 74, 0.5);
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Decorative background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at 30% 20%, rgba(226, 176, 74, 0.03) 0%, transparent 50%),
+                  radial-gradient(ellipse at 70% 80%, rgba(30, 60, 114, 0.08) 0%, transparent 50%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 16px 32px;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      padding: 32px 0 24px;
+    }
+
+    .arabic-title {
+      font-family: 'Amiri', serif;
+      font-size: 2.2rem;
+      color: var(--accent);
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .main-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      font-weight: 300;
+    }
+
+    .location-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 12px;
+      padding: 6px 14px;
+      background: var(--accent-soft);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .location-badge svg {
+      width: 13px;
+      height: 13px;
+      fill: var(--accent);
+    }
+
+    /* Today's highlight card */
+    .today-card {
+      background: var(--today-bg);
+      border: 1px solid var(--today-border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(226, 176, 74, 0.06);
+    }
+
+    .today-card::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle, rgba(226, 176, 74, 0.08), transparent 70%);
+      border-radius: 50%;
+      transform: translate(30%, -30%);
+    }
+
+    .today-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .today-day-number {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .today-day-number span {
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    .today-date {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      margin-bottom: 16px;
+    }
+
+    .today-times {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .today-time-item {
+      text-align: center;
+      padding: 10px 4px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+    }
+
+    .today-time-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 4px;
+    }
+
+    .today-time-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .today-time-item.suhoor {
+      border: 1px solid rgba(100, 180, 255, 0.2);
+      background: rgba(100, 180, 255, 0.05);
+    }
+
+    .today-time-item.suhoor .today-time-label {
+      color: rgba(100, 180, 255, 0.7);
+    }
+
+    .today-time-item.iftar {
+      border: 1px solid rgba(226, 176, 74, 0.25);
+      background: rgba(226, 176, 74, 0.05);
+    }
+
+    .today-time-item.iftar .today-time-label {
+      color: rgba(226, 176, 74, 0.7);
+    }
+
+    .today-not-ramadan {
+      text-align: center;
+      padding: 12px;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .today-not-ramadan .countdown {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: 6px;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .select-wrapper {
+      position: relative;
+      flex: 1;
+    }
+
+    .select-wrapper svg {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      fill: var(--text-secondary);
+      pointer-events: none;
+    }
+
+    .method-select,
+    .city-select {
+      width: 100%;
+      padding: 12px 40px 12px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      font-family: inherit;
+      appearance: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .method-select:focus,
+    .city-select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .method-select option,
+    .city-select option {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .geo-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      flex-shrink: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+
+    .geo-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .geo-btn:active {
+      background: var(--accent-soft);
+    }
+
+    .geo-btn.locating {
+      color: var(--accent);
+      border-color: var(--accent);
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .geo-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    /* Calendar table */
+    .calendar-section {
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 520px;
+    }
+
+    thead th {
+      padding: 12px 8px;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      text-align: center;
+    }
+
+    thead th:first-child {
+      text-align: left;
+      padding-left: 16px;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      transition: background 0.15s;
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: var(--highlight-bg);
+    }
+
+    tbody td {
+      padding: 11px 8px;
+      font-size: 0.82rem;
+      text-align: center;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    tbody td:first-child {
+      text-align: left;
+      padding-left: 16px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .day-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .day-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      flex-shrink: 0;
+    }
+
+    .day-name {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* Today row styling */
+    tr.is-today {
+      background: var(--today-bg) !important;
+    }
+
+    tr.is-today td {
+      color: var(--text-primary);
+      font-weight: 500;
+      padding-top: 14px;
+      padding-bottom: 14px;
+    }
+
+    tr.is-today .day-num {
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-weight: 700;
+      width: 32px;
+      height: 32px;
+      font-size: 0.9rem;
+    }
+
+    tr.is-today td:first-child {
+      position: relative;
+    }
+
+    tr.is-today td:first-child::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10%;
+      height: 80%;
+      width: 3px;
+      background: var(--accent);
+      border-radius: 0 2px 2px 0;
+    }
+
+    /* Past days */
+    tr.is-past td {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+
+    tr.is-past .day-num {
+      opacity: 0.5;
+    }
+
+    /* Loading state */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      gap: 16px;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    /* Error state */
+    .error-msg {
+      text-align: center;
+      padding: 40px 20px;
+      color: #e07a5f;
+      font-size: 0.9rem;
+    }
+
+    .error-msg button {
+      margin-top: 12px;
+      padding: 8px 20px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: 8px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 24px 0 8px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* Scroll hint */
+    .scroll-hint {
+      display: none;
+      text-align: center;
+      padding: 8px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 540px) {
+      .scroll-hint {
+        display: block;
+      }
+    }
+
+    /* Smooth scroll to today */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Suhoor/Iftar column highlights */
+    .col-fajr { color: rgba(130, 190, 255, 0.9) !important; }
+    .col-maghrib { color: rgba(255, 200, 100, 0.95) !important; }
+
+    tr.is-past .col-fajr,
+    tr.is-past .col-maghrib {
+      opacity: 0.5;
+    }
+
+    tr.is-today .col-fajr { color: rgba(130, 190, 255, 1) !important; font-weight: 600 !important; }
+    tr.is-today .col-maghrib { color: rgba(255, 200, 100, 1) !important; font-weight: 600 !important; }
+
+    /* Moon sighting card */
+    .moon-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+
+    .moon-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .moon-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .moon-header-left svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .moon-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .moon-chevron {
+      width: 18px;
+      height: 18px;
+      fill: var(--text-muted);
+      transition: transform 0.2s;
+    }
+
+    .moon-card.open .moon-chevron {
+      transform: rotate(180deg);
+    }
+
+    .moon-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .moon-card.open .moon-body {
+      max-height: 500px;
+    }
+
+    .moon-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 12px;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .moon-row {
+      padding: 12px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .moon-row-label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* Segmented control */
+    .seg-control {
+      display: flex;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .seg-btn {
+      flex: 1;
+      padding: 8px 6px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .seg-btn:hover {
+      color: var(--text-secondary);
+    }
+
+    .seg-btn.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .moon-summary {
+      margin-top: 14px;
+      padding: 10px 12px;
+      background: rgba(226, 176, 74, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .moon-summary strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .moon-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    .moon-badge.adjusted {
+      background: rgba(226, 176, 74, 0.15);
+      color: var(--accent);
+    }
+
+    .moon-badge.default {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+    }
+
+    /* Download calendar card */
+    .download-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+
+    .download-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .download-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .download-header-left svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .download-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .download-chevron {
+      width: 18px;
+      height: 18px;
+      fill: var(--text-muted);
+      transition: transform 0.2s;
+    }
+
+    .download-card.open .download-chevron {
+      transform: rotate(180deg);
+    }
+
+    .download-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .download-card.open .download-body {
+      max-height: 500px;
+    }
+
+    .download-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 12px;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .dl-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .dl-option-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .dl-option-label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .dl-option-sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* Checkbox */
+    .check-box {
+      position: relative;
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .check-box input {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      margin: 0;
+      z-index: 1;
+    }
+
+    .check-mark {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--text-muted);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .check-mark svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: var(--bg-primary);
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .check-box input:checked + .check-mark {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .check-box input:checked + .check-mark svg {
+      opacity: 1;
+    }
+
+    /* Reminder select row */
+    .dl-reminder-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .dl-reminder-row label {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .reminder-select {
+      padding: 7px 30px 7px 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      font-family: inherit;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .reminder-select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .reminder-wrapper {
+      position: relative;
+    }
+
+    .reminder-wrapper svg {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      fill: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* Download button */
+    .dl-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      margin-top: 14px;
+      background: linear-gradient(135deg, var(--accent), #c89630);
+      border: none;
+      border-radius: 12px;
+      color: var(--bg-primary);
+      font-size: 0.88rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .dl-btn:hover {
+      opacity: 0.9;
+    }
+
+    .dl-btn:active {
+      transform: scale(0.98);
+    }
+
+    .dl-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .dl-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--bg-primary);
+    }
+
+    .dl-hint {
+      margin-top: 12px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .dl-success {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: rgba(100, 200, 100, 0.08);
+      border: 1px solid rgba(100, 200, 100, 0.2);
+      border-radius: 8px;
+      font-size: 0.75rem;
+      color: rgba(100, 200, 100, 0.9);
+      line-height: 1.5;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="arabic-title">&#1585;&#1605;&#1590;&#1575;&#1606; &#1603;&#1585;&#1610;&#1605;</div>
+      <div class="main-title">Ramadan 1447 AH</div>
+      <div class="subtitle">Prayer Times Calendar</div>
+      <div class="location-badge" id="locationBadge">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/></svg>
+        <span id="locationText">Rotterdam, Netherlands</span>
+      </div>
+    </header>
+
+    <!-- Today highlight card -->
+    <div class="today-card" id="todayCard">
+      <div class="loading" id="todayLoading">
+        <div class="spinner"></div>
+      </div>
+    </div>
+
+    <!-- Download to calendar -->
+    <div class="download-card" id="downloadCard">
+      <div class="download-header" id="downloadToggle">
+        <div class="download-header-left">
+          <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+          <span class="download-title">Reminders</span>
+        </div>
+        <svg class="download-chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+      </div>
+      <div class="download-body">
+        <div class="download-desc">
+          Download an .ics calendar file with Suhoor &amp; Iftar reminders. Import it into Apple Calendar, Google Calendar, or Outlook for reliable native notifications on your phone.
+        </div>
+        <div class="dl-option">
+          <div class="dl-option-left">
+            <span class="dl-option-label">Suhoor reminders</span>
+            <span class="dl-option-sub">Alert before Fajr each day</span>
+          </div>
+          <label class="check-box">
+            <input type="checkbox" id="dlSuhoor" checked>
+            <span class="check-mark"><svg viewBox="0 0 16 16"><polyline points="3.5 8.5 6.5 11.5 12.5 4.5"/></svg></span>
+          </label>
+        </div>
+        <div class="dl-option">
+          <div class="dl-option-left">
+            <span class="dl-option-label">Iftar reminders</span>
+            <span class="dl-option-sub">Alert before Maghrib each day</span>
+          </div>
+          <label class="check-box">
+            <input type="checkbox" id="dlIftar" checked>
+            <span class="check-mark"><svg viewBox="0 0 16 16"><polyline points="3.5 8.5 6.5 11.5 12.5 4.5"/></svg></span>
+          </label>
+        </div>
+        <div class="dl-reminder-row">
+          <label>Remind me</label>
+          <div class="reminder-wrapper">
+            <select class="reminder-select" id="dlMinutes">
+              <option value="5">5 min before</option>
+              <option value="10">10 min before</option>
+              <option value="15" selected>15 min before</option>
+              <option value="20">20 min before</option>
+              <option value="30">30 min before</option>
+              <option value="45">45 min before</option>
+              <option value="60">1 hour before</option>
+            </select>
+            <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+          </div>
+        </div>
+        <button class="dl-btn" id="dlBtn" disabled>
+          <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          Download .ics Calendar
+        </button>
+        <div class="dl-hint">
+          Opens in your calendar app automatically. Each Suhoor/Iftar event includes a built-in alarm.
+        </div>
+        <div class="dl-success" id="dlSuccess">
+          Calendar downloaded! Open the file to import it into your calendar app.
+        </div>
+      </div>
+    </div>
+
+    <!-- Moon sighting adjustment -->
+    <div class="moon-card" id="moonCard">
+      <div class="moon-header" id="moonToggle">
+        <div class="moon-header-left">
+          <svg viewBox="0 0 24 24"><path d="M12.43 2.3c-2.38-.59-4.68-.27-6.63.64-.35.16-.41.64-.1.86C8.3 5.6 10 8.6 10 12c0 3.4-1.7 6.4-4.3 8.2-.32.22-.26.7.09.86 1.28.6 2.71.94 4.21.94 6.05 0 10.85-5.38 9.87-11.6-.61-3.92-3.59-7.16-7.44-8.1z"/></svg>
+          <span class="moon-title">Moon Sighting</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="moon-badge default" id="moonBadge">Umm Al-Qura</span>
+          <svg class="moon-chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+        </div>
+      </div>
+      <div class="moon-body">
+        <div class="moon-desc">
+          Adjust based on the Saudi Supreme Court moon sighting announcement. The default dates follow the Umm Al-Qura calendar.
+        </div>
+        <div class="moon-row">
+          <div class="moon-row-label">Start of Ramadan</div>
+          <div class="seg-control" id="startControl">
+            <button class="seg-btn" data-val="-1">1 day earlier</button>
+            <button class="seg-btn active" data-val="0">As expected</button>
+            <button class="seg-btn" data-val="1">1 day later</button>
+          </div>
+        </div>
+        <div class="moon-row">
+          <div class="moon-row-label">End of Ramadan</div>
+          <div class="seg-control" id="endControl">
+            <button class="seg-btn" data-val="-1">1 day earlier</button>
+            <button class="seg-btn active" data-val="0">As expected</button>
+            <button class="seg-btn" data-val="1">1 day later</button>
+          </div>
+        </div>
+        <div class="moon-summary" id="moonSummary">
+          Loading dates...
+        </div>
+      </div>
+    </div>
+
+    <!-- City & source selectors -->
+    <div class="controls">
+      <div class="controls-row">
+        <div class="select-wrapper">
+          <select class="city-select" id="citySelect"></select>
+          <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+        </div>
+        <button class="geo-btn" id="geoBtn" title="Use my location">
+          <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+        </button>
+      </div>
+      <div class="select-wrapper">
+        <select class="method-select" id="methodSelect">
+          <option value="3">Muslim World League</option>
+          <option value="2">Islamic Society of North America (ISNA)</option>
+          <option value="5">Egyptian General Authority of Survey</option>
+          <option value="4">Umm Al-Qura University, Makkah</option>
+          <option value="1">University of Islamic Sciences, Karachi</option>
+          <option value="12">Union Organization Islamique de France</option>
+          <option value="13">Diyanet &#304;&#351;leri Ba&#351;kanl&#305;&#287;&#305;, Turkey</option>
+          <option value="7">Institute of Geophysics, University of Tehran</option>
+          <option value="0">Shia Ithna-Ansari</option>
+          <option value="8">Gulf Region</option>
+          <option value="9">Kuwait</option>
+          <option value="10">Qatar</option>
+          <option value="11">Majlis Ugama Islam Singapura</option>
+          <option value="14">Spiritual Administration of Muslims of Russia</option>
+          <option value="15">Moonsighting Committee Worldwide</option>
+          <option value="99">Custom (18°/17° angles)</option>
+        </select>
+        <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+      </div>
+    </div>
+
+    <!-- Calendar table -->
+    <div class="calendar-section">
+      <div class="scroll-hint">&#8592; Scroll horizontally &#8594;</div>
+      <div class="table-wrapper">
+        <div id="calendarContent">
+          <div class="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">Loading prayer times...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Data provided by <a href="https://aladhan.com" target="_blank" rel="noopener">Al Adhan API</a><br>
+      Times may vary &mdash; always verify with your local mosque
+    </footer>
+  </div>
+
+  <script>
+    const HIJRI_YEAR = 1447;
+    const RAMADAN_MONTH = 9;
+
+    function getToday() {
+      return new Date();
+    }
+
+    const CITIES = [
+      { name: 'Rotterdam', country: 'Netherlands', lat: 51.9225, lng: 4.4792 },
+      { name: 'Amsterdam', country: 'Netherlands', lat: 52.3676, lng: 4.9041 },
+      { name: 'The Hague', country: 'Netherlands', lat: 52.0705, lng: 4.3007 },
+      { name: 'Utrecht', country: 'Netherlands', lat: 52.0907, lng: 5.1214 },
+      { name: 'Eindhoven', country: 'Netherlands', lat: 51.4416, lng: 5.4697 },
+      { name: 'Brussels', country: 'Belgium', lat: 50.8503, lng: 4.3517 },
+      { name: 'Antwerp', country: 'Belgium', lat: 51.2194, lng: 4.4025 },
+      { name: 'London', country: 'UK', lat: 51.5074, lng: -0.1278 },
+      { name: 'Birmingham', country: 'UK', lat: 52.4862, lng: -1.8904 },
+      { name: 'Manchester', country: 'UK', lat: 53.4808, lng: -2.2426 },
+      { name: 'Paris', country: 'France', lat: 48.8566, lng: 2.3522 },
+      { name: 'Marseille', country: 'France', lat: 43.2965, lng: 5.3698 },
+      { name: 'Berlin', country: 'Germany', lat: 52.5200, lng: 13.4050 },
+      { name: 'Frankfurt', country: 'Germany', lat: 50.1109, lng: 8.6821 },
+      { name: 'Cologne', country: 'Germany', lat: 50.9375, lng: 6.9603 },
+      { name: 'Munich', country: 'Germany', lat: 48.1351, lng: 11.5820 },
+      { name: 'Istanbul', country: 'Turkey', lat: 41.0082, lng: 28.9784 },
+      { name: 'Ankara', country: 'Turkey', lat: 39.9334, lng: 32.8597 },
+      { name: 'Cairo', country: 'Egypt', lat: 30.0444, lng: 31.2357 },
+      { name: 'Casablanca', country: 'Morocco', lat: 33.5731, lng: -7.5898 },
+      { name: 'Dubai', country: 'UAE', lat: 25.2048, lng: 55.2708 },
+      { name: 'Riyadh', country: 'Saudi Arabia', lat: 24.7136, lng: 46.6753 },
+      { name: 'Makkah', country: 'Saudi Arabia', lat: 21.3891, lng: 39.8579 },
+      { name: 'Madinah', country: 'Saudi Arabia', lat: 24.5247, lng: 39.5692 },
+      { name: 'Kuala Lumpur', country: 'Malaysia', lat: 3.1390, lng: 101.6869 },
+      { name: 'Jakarta', country: 'Indonesia', lat: -6.2088, lng: 106.8456 },
+      { name: 'Islamabad', country: 'Pakistan', lat: 33.6844, lng: 73.0479 },
+      { name: 'Karachi', country: 'Pakistan', lat: 24.8607, lng: 67.0011 },
+      { name: 'Dhaka', country: 'Bangladesh', lat: 23.8103, lng: 90.4125 },
+      { name: 'Toronto', country: 'Canada', lat: 43.6532, lng: -79.3832 },
+      { name: 'New York', country: 'USA', lat: 40.7128, lng: -74.0060 },
+      { name: 'Chicago', country: 'USA', lat: 41.8781, lng: -87.6298 },
+      { name: 'Los Angeles', country: 'USA', lat: 34.0522, lng: -118.2437 },
+      { name: 'Stockholm', country: 'Sweden', lat: 59.3293, lng: 18.0686 },
+      { name: 'Oslo', country: 'Norway', lat: 59.9139, lng: 10.7522 },
+      { name: 'Copenhagen', country: 'Denmark', lat: 55.6761, lng: 12.5683 },
+      { name: 'Vienna', country: 'Austria', lat: 48.2082, lng: 16.3738 },
+      { name: 'Zurich', country: 'Switzerland', lat: 47.3769, lng: 8.5417 },
+      { name: 'Rome', country: 'Italy', lat: 41.9028, lng: 12.4964 },
+      { name: 'Madrid', country: 'Spain', lat: 40.4168, lng: -3.7038 },
+    ];
+
+    let currentCity = CITIES[0]; // Rotterdam default
+    let cachedData = {};
+
+    const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    function distanceKm(lat1, lng1, lat2, lng2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLng = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function findClosestCity(lat, lng) {
+      let closest = CITIES[0];
+      let minDist = Infinity;
+      for (const city of CITIES) {
+        const d = distanceKm(lat, lng, city.lat, city.lng);
+        if (d < minDist) {
+          minDist = d;
+          closest = city;
+        }
+      }
+      return { city: closest, distance: minDist };
+    }
+
+    function populateCitySelect() {
+      const sel = document.getElementById('citySelect');
+      // Group by country
+      const grouped = {};
+      for (const c of CITIES) {
+        if (!grouped[c.country]) grouped[c.country] = [];
+        grouped[c.country].push(c);
+      }
+      // Sort countries, put Netherlands first
+      const countries = Object.keys(grouped).sort((a, b) => {
+        if (a === 'Netherlands') return -1;
+        if (b === 'Netherlands') return 1;
+        return a.localeCompare(b);
+      });
+
+      sel.innerHTML = '';
+      for (const country of countries) {
+        const group = document.createElement('optgroup');
+        group.label = country;
+        for (const city of grouped[country]) {
+          const opt = document.createElement('option');
+          opt.value = city.name;
+          opt.textContent = city.name;
+          group.appendChild(opt);
+        }
+        sel.appendChild(group);
+      }
+    }
+
+    function setCity(cityName) {
+      const city = CITIES.find(c => c.name === cityName);
+      if (!city) return;
+      currentCity = city;
+      document.getElementById('citySelect').value = city.name;
+      document.getElementById('locationText').textContent = `${city.name}, ${city.country}`;
+      localStorage.setItem('ramadan_city', city.name);
+    }
+
+    // Moon sighting offsets
+    let moonStartOffset = 0; // -1, 0, +1
+    let moonEndOffset = 0;   // -1, 0, +1
+    let baseRamadanDays = null; // Original API data
+
+    function getMoonPrefs() {
+      try {
+        const raw = localStorage.getItem('ramadan_moon');
+        if (raw) {
+          const p = JSON.parse(raw);
+          return { start: p.start || 0, end: p.end || 0 };
+        }
+      } catch {}
+      return { start: 0, end: 0 };
+    }
+
+    function saveMoonPrefs() {
+      localStorage.setItem('ramadan_moon', JSON.stringify({ start: moonStartOffset, end: moonEndOffset }));
+    }
+
+    function buildMethodUrl(method) {
+      if (method === '99') {
+        return `?latitude=${currentCity.lat}&longitude=${currentCity.lng}&method=99&methodSettings=18,null,17`;
+      }
+      return `?latitude=${currentCity.lat}&longitude=${currentCity.lng}&method=${method}`;
+    }
+
+    async function fetchRamadanTimes(method) {
+      const cacheKey = `${currentCity.name}_${method}`;
+      if (cachedData[cacheKey]) return cachedData[cacheKey];
+
+      const params = buildMethodUrl(method);
+      const url = `https://api.aladhan.com/v1/hijriCalendar/${HIJRI_YEAR}/${RAMADAN_MONTH}${params}`;
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`API returned ${res.status}`);
+      const json = await res.json();
+      if (json.code !== 200 || !json.data) throw new Error('Invalid API response');
+
+      cachedData[cacheKey] = json.data;
+      return json.data;
+    }
+
+    async function fetchDayByDate(gregDate, method) {
+      // gregDate is a Date object
+      const dd = String(gregDate.getDate()).padStart(2, '0');
+      const mm = String(gregDate.getMonth() + 1).padStart(2, '0');
+      const yyyy = gregDate.getFullYear();
+      const dateStr = `${dd}-${mm}-${yyyy}`;
+      const cacheKey = `day_${currentCity.name}_${method}_${dateStr}`;
+      if (cachedData[cacheKey]) return cachedData[cacheKey];
+
+      const params = buildMethodUrl(method);
+      const url = `https://api.aladhan.com/v1/timings/${dateStr}${params}`;
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`API returned ${res.status}`);
+      const json = await res.json();
+      if (json.code !== 200 || !json.data) throw new Error('Invalid API response');
+
+      cachedData[cacheKey] = json.data;
+      return json.data;
+    }
+
+    async function getAdjustedDays(method) {
+      // Fetch base Ramadan month
+      const rawDays = await fetchRamadanTimes(method);
+      const days = rawDays.map(entry => ({ date: entry.date, timings: entry.timings }));
+      baseRamadanDays = days;
+
+      let result = [...days];
+
+      // Apply start offset
+      if (moonStartOffset === 1) {
+        // Ramadan starts 1 day later: remove first day
+        result = result.slice(1);
+      } else if (moonStartOffset === -1) {
+        // Ramadan starts 1 day earlier: need the day before
+        const firstGreg = getGregorianDateObj(days[0].date);
+        const dayBefore = new Date(firstGreg);
+        dayBefore.setDate(dayBefore.getDate() - 1);
+        const extra = await fetchDayByDate(dayBefore, method);
+        result.unshift({ date: extra.date, timings: extra.timings });
+      }
+
+      // Apply end offset
+      if (moonEndOffset === -1) {
+        // Ramadan ends 1 day earlier: remove last day
+        result = result.slice(0, -1);
+      } else if (moonEndOffset === 1) {
+        // Ramadan ends 1 day later: need the day after
+        const lastGreg = getGregorianDateObj(days[days.length - 1].date);
+        const dayAfter = new Date(lastGreg);
+        dayAfter.setDate(dayAfter.getDate() + 1);
+        const extra = await fetchDayByDate(dayAfter, method);
+        result.push({ date: extra.date, timings: extra.timings });
+      }
+
+      // Re-number: override the hijri day for display with sequential 1..N
+      result.forEach((entry, i) => {
+        entry.ramadanDay = i + 1;
+      });
+
+      return result;
+    }
+
+    function formatGregorianDate(dateObj) {
+      const d = dateObj.gregorian;
+      return `${d.day} ${MONTH_NAMES[parseInt(d.month.number) - 1]}`;
+    }
+
+    function getGregorianDateObj(dateObj) {
+      const d = dateObj.gregorian;
+      return new Date(
+        parseInt(d.year),
+        parseInt(d.month.number) - 1,
+        parseInt(d.day)
+      );
+    }
+
+    function isToday(dateObj) {
+      const d = getGregorianDateObj(dateObj);
+      const now = getToday();
+      return d.getFullYear() === now.getFullYear() &&
+             d.getMonth() === now.getMonth() &&
+             d.getDate() === now.getDate();
+    }
+
+    function isPast(dateObj) {
+      const d = getGregorianDateObj(dateObj);
+      const now = new Date(getToday());
+      now.setHours(0, 0, 0, 0);
+      return d < now;
+    }
+
+    function getDayName(dateObj) {
+      const d = getGregorianDateObj(dateObj);
+      return DAY_NAMES[d.getDay()];
+    }
+
+    function renderTodayCard(days) {
+      const card = document.getElementById('todayCard');
+      const todayEntry = days.find(d => isToday(d.date));
+
+      if (todayEntry) {
+        const hijriDay = todayEntry.ramadanDay || todayEntry.date.hijri.day;
+        const gregDate = formatGregorianDate(todayEntry.date);
+        const dayName = getDayName(todayEntry.date);
+        const t = todayEntry.timings;
+
+        card.innerHTML = `
+          <div class="today-label">Today &mdash; ${dayName}, ${gregDate}</div>
+          <div class="today-day-number">${hijriDay}<span>Ramadan</span></div>
+          <div class="today-date">${todayEntry.date.hijri.month.en} ${todayEntry.date.hijri.day}, ${todayEntry.date.hijri.year} AH</div>
+          <div class="today-times">
+            <div class="today-time-item suhoor">
+              <div class="today-time-label">Suhoor ends</div>
+              <div class="today-time-value">${cleanTime(t.Fajr)}</div>
+            </div>
+            <div class="today-time-item">
+              <div class="today-time-label">Sunrise</div>
+              <div class="today-time-value">${cleanTime(t.Sunrise)}</div>
+            </div>
+            <div class="today-time-item">
+              <div class="today-time-label">Dhuhr</div>
+              <div class="today-time-value">${cleanTime(t.Dhuhr)}</div>
+            </div>
+            <div class="today-time-item">
+              <div class="today-time-label">Asr</div>
+              <div class="today-time-value">${cleanTime(t.Asr)}</div>
+            </div>
+            <div class="today-time-item iftar">
+              <div class="today-time-label">Iftar</div>
+              <div class="today-time-value">${cleanTime(t.Maghrib)}</div>
+            </div>
+            <div class="today-time-item">
+              <div class="today-time-label">Isha</div>
+              <div class="today-time-value">${cleanTime(t.Isha)}</div>
+            </div>
+          </div>
+        `;
+      } else {
+        // Check if Ramadan hasn't started yet
+        const firstDay = getGregorianDateObj(days[0].date);
+        const now = new Date(getToday());
+        now.setHours(0, 0, 0, 0);
+
+        if (now < firstDay) {
+          const diffDays = Math.ceil((firstDay - now) / (1000 * 60 * 60 * 24));
+          const gregFirst = formatGregorianDate(days[0].date);
+          card.innerHTML = `
+            <div class="today-not-ramadan">
+              Ramadan begins on <strong>${gregFirst}</strong>
+              <div class="countdown">${diffDays} day${diffDays !== 1 ? 's' : ''} to go</div>
+            </div>
+          `;
+        } else {
+          const lastDay = getGregorianDateObj(days[days.length - 1].date);
+          if (now > lastDay) {
+            card.innerHTML = `
+              <div class="today-not-ramadan">
+                Ramadan 1447 has ended.<br>May your deeds be accepted. Eid Mubarak!
+              </div>
+            `;
+          }
+        }
+      }
+    }
+
+    function cleanTime(timeStr) {
+      // Remove timezone abbreviation like " (CET)" or " (CEST)"
+      return timeStr.replace(/\s*\(.*?\)\s*$/, '');
+    }
+
+    function renderCalendar(days) {
+      const content = document.getElementById('calendarContent');
+
+      let html = `<table>
+        <thead>
+          <tr>
+            <th>Day</th>
+            <th>Fajr</th>
+            <th>Sunrise</th>
+            <th>Dhuhr</th>
+            <th>Asr</th>
+            <th>Maghrib</th>
+            <th>Isha</th>
+          </tr>
+        </thead>
+        <tbody>`;
+
+      days.forEach(entry => {
+        const hijriDay = entry.ramadanDay || entry.date.hijri.day;
+        const dayName = getDayName(entry.date);
+        const gregDate = formatGregorianDate(entry.date);
+        const today = isToday(entry.date);
+        const past = isPast(entry.date);
+        const t = entry.timings;
+
+        let rowClass = '';
+        if (today) rowClass = 'is-today';
+        else if (past) rowClass = 'is-past';
+
+        html += `<tr class="${rowClass}" ${today ? 'id="todayRow"' : ''}>
+          <td>
+            <div class="day-cell">
+              <span class="day-num">${hijriDay}</span>
+              <span class="day-name">${dayName} ${gregDate}</span>
+            </div>
+          </td>
+          <td class="col-fajr">${cleanTime(t.Fajr)}</td>
+          <td>${cleanTime(t.Sunrise)}</td>
+          <td>${cleanTime(t.Dhuhr)}</td>
+          <td>${cleanTime(t.Asr)}</td>
+          <td class="col-maghrib">${cleanTime(t.Maghrib)}</td>
+          <td>${cleanTime(t.Isha)}</td>
+        </tr>`;
+      });
+
+      html += '</tbody></table>';
+      content.innerHTML = html;
+
+      // Scroll to today's row
+      requestAnimationFrame(() => {
+        const todayRow = document.getElementById('todayRow');
+        if (todayRow) {
+          todayRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    }
+
+    async function loadCalendar() {
+      const method = document.getElementById('methodSelect').value;
+      const content = document.getElementById('calendarContent');
+
+      content.innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          <div class="loading-text">Loading prayer times...</div>
+        </div>`;
+
+      document.getElementById('todayCard').innerHTML = `
+        <div class="loading" id="todayLoading">
+          <div class="spinner"></div>
+        </div>`;
+
+      try {
+        const days = await getAdjustedDays(method);
+
+        renderTodayCard(days);
+        renderCalendar(days);
+        updateMoonSummary(days);
+
+        // Store loaded days for .ics download
+        loadedDays = days;
+        document.getElementById('dlBtn').disabled = false;
+
+        // Save preferred method
+        localStorage.setItem('ramadan_method', method);
+      } catch (err) {
+        console.error(err);
+        content.innerHTML = `
+          <div class="error-msg">
+            Failed to load prayer times.<br>
+            <small>${err.message}</small>
+            <br><button onclick="loadCalendar()">Try Again</button>
+          </div>`;
+        document.getElementById('todayCard').innerHTML = '';
+      }
+    }
+
+    // ==================== MOON SIGHTING ====================
+    function updateMoonSummary(days) {
+      const el = document.getElementById('moonSummary');
+      const badge = document.getElementById('moonBadge');
+      if (!days || !days.length) {
+        el.textContent = 'Loading dates...';
+        return;
+      }
+
+      const firstDate = formatGregorianDate(days[0].date);
+      const lastDate = formatGregorianDate(days[days.length - 1].date);
+      const numDays = days.length;
+      const isAdjusted = moonStartOffset !== 0 || moonEndOffset !== 0;
+
+      badge.className = 'moon-badge ' + (isAdjusted ? 'adjusted' : 'default');
+      badge.textContent = isAdjusted ? 'Adjusted' : 'Umm Al-Qura';
+
+      el.innerHTML = `Your Ramadan: <strong>${firstDate}</strong> &ndash; <strong>${lastDate}</strong> &nbsp;(${numDays} days)`;
+    }
+
+    function initMoonCard() {
+      // Restore prefs
+      const prefs = getMoonPrefs();
+      moonStartOffset = prefs.start;
+      moonEndOffset = prefs.end;
+
+      // Collapsible
+      document.getElementById('moonToggle').addEventListener('click', () => {
+        document.getElementById('moonCard').classList.toggle('open');
+      });
+
+      // Segmented controls
+      function setupSegControl(containerId, currentVal, onChange) {
+        const container = document.getElementById(containerId);
+        const btns = container.querySelectorAll('.seg-btn');
+        // Set initial state
+        btns.forEach(btn => {
+          btn.classList.toggle('active', parseInt(btn.dataset.val) === currentVal);
+          btn.addEventListener('click', () => {
+            btns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            onChange(parseInt(btn.dataset.val));
+          });
+        });
+      }
+
+      setupSegControl('startControl', moonStartOffset, (val) => {
+        moonStartOffset = val;
+        saveMoonPrefs();
+        loadCalendar();
+      });
+
+      setupSegControl('endControl', moonEndOffset, (val) => {
+        moonEndOffset = val;
+        saveMoonPrefs();
+        cachedData = {};
+        loadCalendar();
+      });
+    }
+
+    // ==================== END MOON SIGHTING ====================
+
+    // ==================== ICS CALENDAR DOWNLOAD ====================
+    let loadedDays = null;
+
+    function icsEscape(str) {
+      return str.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+    }
+
+    function icsDateTimeLocal(dateObj, timeStr) {
+      // dateObj is the API date object, timeStr is like "05:23 (CET)"
+      const d = dateObj.gregorian;
+      const year = d.year;
+      const month = String(d.month.number).padStart(2, '0');
+      const day = String(d.day).padStart(2, '0');
+      const clean = timeStr.replace(/\s*\(.*?\)\s*$/, '');
+      const [h, m] = clean.split(':');
+      return `${year}${month}${day}T${h.padStart(2, '0')}${m.padStart(2, '0')}00`;
+    }
+
+    function icsEndTime(dateObj, timeStr, durationMinutes) {
+      const d = dateObj.gregorian;
+      const clean = timeStr.replace(/\s*\(.*?\)\s*$/, '');
+      const [h, m] = clean.split(':').map(Number);
+      const date = new Date(
+        parseInt(d.year),
+        parseInt(d.month.number) - 1,
+        parseInt(d.day),
+        h, m + durationMinutes
+      );
+      const yy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const dd = String(date.getDate()).padStart(2, '0');
+      const hh = String(date.getHours()).padStart(2, '0');
+      const mi = String(date.getMinutes()).padStart(2, '0');
+      return `${yy}${mm}${dd}T${hh}${mi}00`;
+    }
+
+    function generateUID() {
+      return 'ramadan-' + Math.random().toString(36).substr(2, 9) + '@prayertimes';
+    }
+
+    function generateICS(days, options) {
+      const { suhoor, iftar, reminderMinutes } = options;
+      const cityName = currentCity.name;
+      const lines = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Ramadan Prayer Times//EN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        `X-WR-CALNAME:Ramadan ${HIJRI_YEAR} - ${cityName}`,
+        'X-WR-TIMEZONE:Europe/Amsterdam',
+      ];
+
+      for (const entry of days) {
+        const hijriDay = entry.ramadanDay || entry.date.hijri.day;
+        const gregDate = formatGregorianDate(entry.date);
+        const dayName = getDayName(entry.date);
+
+        if (suhoor && entry.timings.Fajr) {
+          const fajrTime = cleanTime(entry.timings.Fajr);
+          lines.push(
+            'BEGIN:VEVENT',
+            `UID:${generateUID()}`,
+            `DTSTART:${icsDateTimeLocal(entry.date, entry.timings.Fajr)}`,
+            `DTEND:${icsEndTime(entry.date, entry.timings.Fajr, 5)}`,
+            `SUMMARY:${icsEscape(`Suhoor ends - Fajr ${fajrTime}`)}`,
+            `DESCRIPTION:${icsEscape(`Ramadan Day ${hijriDay} (${dayName} ${gregDate})\\nSuhoor ends at Fajr: ${fajrTime}\\nCity: ${cityName}`)}`,
+            `LOCATION:${icsEscape(cityName)}`,
+            'BEGIN:VALARM',
+            'TRIGGER:-PT' + reminderMinutes + 'M',
+            'ACTION:DISPLAY',
+            `DESCRIPTION:Suhoor ends in ${reminderMinutes} minutes (Fajr at ${fajrTime})`,
+            'END:VALARM',
+            'BEGIN:VALARM',
+            'TRIGGER:-PT' + reminderMinutes + 'M',
+            'ACTION:AUDIO',
+            'END:VALARM',
+            'END:VEVENT'
+          );
+        }
+
+        if (iftar && entry.timings.Maghrib) {
+          const maghribTime = cleanTime(entry.timings.Maghrib);
+          lines.push(
+            'BEGIN:VEVENT',
+            `UID:${generateUID()}`,
+            `DTSTART:${icsDateTimeLocal(entry.date, entry.timings.Maghrib)}`,
+            `DTEND:${icsEndTime(entry.date, entry.timings.Maghrib, 30)}`,
+            `SUMMARY:${icsEscape(`Iftar - Maghrib ${maghribTime}`)}`,
+            `DESCRIPTION:${icsEscape(`Ramadan Day ${hijriDay} (${dayName} ${gregDate})\\nIftar at Maghrib: ${maghribTime}\\nCity: ${cityName}`)}`,
+            `LOCATION:${icsEscape(cityName)}`,
+            'BEGIN:VALARM',
+            'TRIGGER:-PT' + reminderMinutes + 'M',
+            'ACTION:DISPLAY',
+            `DESCRIPTION:Iftar in ${reminderMinutes} minutes (Maghrib at ${maghribTime})`,
+            'END:VALARM',
+            'BEGIN:VALARM',
+            'TRIGGER:-PT' + reminderMinutes + 'M',
+            'ACTION:AUDIO',
+            'END:VALARM',
+            'END:VEVENT'
+          );
+        }
+      }
+
+      lines.push('END:VCALENDAR');
+      // ICS spec: lines must use CRLF
+      return lines.join('\r\n');
+    }
+
+    function downloadICS() {
+      if (!loadedDays) return;
+
+      const suhoor = document.getElementById('dlSuhoor').checked;
+      const iftar = document.getElementById('dlIftar').checked;
+      const reminderMinutes = parseInt(document.getElementById('dlMinutes').value);
+
+      if (!suhoor && !iftar) {
+        alert('Please select at least Suhoor or Iftar reminders.');
+        return;
+      }
+
+      const icsContent = generateICS(loadedDays, { suhoor, iftar, reminderMinutes });
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ramadan-${HIJRI_YEAR}-${currentCity.name.toLowerCase().replace(/\s+/g, '-')}.ics`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      // Show success message
+      const msg = document.getElementById('dlSuccess');
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 5000);
+    }
+
+    function initDownloadPanel() {
+      document.getElementById('downloadToggle').addEventListener('click', () => {
+        document.getElementById('downloadCard').classList.toggle('open');
+      });
+      document.getElementById('dlBtn').addEventListener('click', downloadICS);
+    }
+
+    // ==================== END ICS DOWNLOAD ====================
+
+    // Geolocation
+    function handleGeolocation() {
+      const btn = document.getElementById('geoBtn');
+      if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser.');
+        return;
+      }
+
+      btn.classList.add('locating');
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          btn.classList.remove('locating');
+          const { city, distance } = findClosestCity(pos.coords.latitude, pos.coords.longitude);
+          setCity(city.name);
+          loadCalendar();
+        },
+        (err) => {
+          btn.classList.remove('locating');
+          alert('Could not get your location. Please select a city manually.');
+        },
+        { enableHighAccuracy: false, timeout: 10000 }
+      );
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', () => {
+      populateCitySelect();
+
+      // Restore saved city
+      const savedCity = localStorage.getItem('ramadan_city');
+      if (savedCity && CITIES.find(c => c.name === savedCity)) {
+        setCity(savedCity);
+      } else {
+        setCity('Rotterdam');
+      }
+
+      // Restore saved method
+      const savedMethod = localStorage.getItem('ramadan_method');
+      if (savedMethod) {
+        const sel = document.getElementById('methodSelect');
+        if (sel.querySelector(`option[value="${savedMethod}"]`)) {
+          sel.value = savedMethod;
+        }
+      }
+
+      initMoonCard();
+      initDownloadPanel();
+
+      loadCalendar();
+
+      document.getElementById('citySelect').addEventListener('change', (e) => {
+        setCity(e.target.value);
+        loadCalendar();
+      });
+
+      document.getElementById('methodSelect').addEventListener('change', () => {
+        localStorage.setItem('ramadan_method', document.getElementById('methodSelect').value);
+        loadCalendar();
+      });
+
+      document.getElementById('geoBtn').addEventListener('click', handleGeolocation);
+    });
+  </script>
+</body>
+</html>
